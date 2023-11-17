@@ -1,82 +1,116 @@
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.stream.Collectors;
 
-public class Encrypter {
+public class Encrypter 
+{
 
     private int shift;
     private String encrypted;
 
-    /**
-     * Default Constructor
-     */
-    public Encrypter() {
+    public Encrypter() 
+    {
         this.shift = 1;
         this.encrypted = "";
     }
 
-    /**
-     * Non-default Constructor
-     * @param s - custom shift amount
-     */
-    public Encrypter(int s) {
+    public Encrypter(int s) 
+    {
         this.shift = s;
         this.encrypted = "";
     }
 
-    /**
-     * Encrypts the content of a file and writes the result to another file.
-     *
-     * @param inputFilePath      the path to the file containing the text to be encrypted
-     * @param encryptedFilePath the path to the file where the encrypted text will be written
-     * @throws Exception if an error occurs while reading or writing the files
-     */
-    public void encrypt(String inputFilePath, String encryptedFilePath) throws Exception {
-        //TODO: Call the read method, encrypt the file contents, and then write to new file
+    
+    public void encrypt(String inputFilePath, String encryptedFilePath) throws Exception 
+    {
+        int n;
+    	String input = readFile(inputFilePath);
+    	StringBuilder encrypted = new StringBuilder();
+
+        for (char ch : input.toCharArray()) 
+        {
+        	if(Character.isLetter(ch))
+            {
+        		int n1 = (int)ch+shift;
+        		if(n1 > 90 && Character.isUpperCase(ch))
+                {
+        			n = n1-90;
+        			n1 = 65 + n -1;
+        		}
+                else if(n1 > 122 && Character.isLowerCase(ch))
+                {
+        			n = n1-122;
+        			n1 = 97 + n - 1;
+        		}
+                encrypted.append((char)n1);
+        	}else
+            {
+        		encrypted.append(ch);
+        	}
+        }
+        writeFile(encrypted.toString(), encryptedFilePath);
     }
 
-    /**
-     * Decrypts the content of an encrypted file and writes the result to another file.
-     *
-     * @param messageFilePath    the path to the file containing the encrypted text
-     * @param decryptedFilePath the path to the file where the decrypted text will be written
-     * @throws Exception if an error occurs while reading or writing the files
-     */
-    public void decrypt(String messageFilePath, String decryptedFilePath) throws Exception {
-        //TODO: Call the read method, decrypt the file contents, and then write to new file
+    
+    public void decrypt(String messageFilePath, String decryptedFilePath) throws Exception 
+    {
+        int d1;
+    	String input = readFile(messageFilePath);
+    	StringBuilder encrypted = new StringBuilder();
+
+        for (char c1 : input.toCharArray()) 
+        {
+        	if(Character.isLetter(c1))
+            {
+        		int n1 = (int)c1-shift;
+        		if(n1 < 65 && Character.isUpperCase(c1))
+                {
+        			d1 = 65-n1;
+        			n1 = 90 - d1 + 1;
+        		}else if(n1 < 97 && Character.isLowerCase(c1))
+                {
+        			d1 = 97-n1;
+        			n1 = 122 - d1 + 1;
+        		}
+                encrypted.append((char)n1);
+        	}else
+            {
+        		encrypted.append(c1);
+        	}
+        }
+        writeFile(encrypted.toString(), decryptedFilePath);
     }
 
-    /**
-     * Reads the content of a file and returns it as a string.
-     *
-     * @param filePath the path to the file to be read
-     * @return the content of the file as a string
-     * @throws Exception if an error occurs while reading the file
-     */
-    private static String readFile(String filePath) throws Exception {
+    
+    private static String readFile(String filePath) throws Exception 
+    {
         String message = "";
-        //TODO: Read file from filePath
+        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath)))
+        {
+        	message = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
         return message;
     }
 
-    /**
-     * Writes data to a file.
-     *
-     * @param data     the data to be written to the file
-     * @param filePath the path to the file where the data will be written
-     */
-    private static void writeFile(String data, String filePath) {
-        //TODO: Write to filePath
+    
+    private static void writeFile(String data, String filePath) 
+    {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) 
+        {
+            writer.write(data);
+            System.out.println("String successfully written to the file: " + filePath);
+        } catch (IOException e) 
+        {
+            System.err.println("Error writing string to file: " + e.getMessage());
+        }
     }
 
-    /**
-     * Returns a string representation of the encrypted text.
-     *
-     * @return the encrypted text
-     */
     @Override
-    public String toString() {
+    public String toString() 
+    {
         return encrypted;
     }
 }
